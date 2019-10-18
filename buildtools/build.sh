@@ -13,6 +13,8 @@ rm -rf "libnfs"
 mkdir  "libnfs"
 mkdir  "libnfs/include"
 mkdir  "libnfs/lib"
+mkdir  "libnfs/nfs"
+mkdir  "libnfs/nfs4"
 PACKAGE_DIRECTORY=`pwd`
 export LIB_OUTPUT="${PACKAGE_DIRECTORY}/libnfs/lib"
 cd buildtools
@@ -40,16 +42,11 @@ fi
 export USECLANG=1
 export CFLAGS="-fembed-bitcode -Wno-everything -DHAVE_SOCKADDR_LEN=1 -DHAVE_SOCKADDR_STORAGE=1"
 export CPPFLAGS="-I${PACKAGE_DIRECTORY}/buildtools/include"
-#export CPPFLAGS="-I/usr/local/opt/openssl/include"
 export LDFLAGS="-L${LIB_OUTPUT}"
-#export PKG_CONFIG_PATH="/usr/local/opt/openssl/lib/pkgconfig"
 
 echo "Making libnfs static libararies"
-if [[ -z "${WITH_KRB5}" ]]; then
-    FRPARAM="--without-libkrb5 --disable-werror"
-else
-    FRPARAM="--disable-werror"
-fi
+
+FRPARAM="--disable-werror"
 
 echo "  Build iOS"
 export OS=ios
@@ -67,6 +64,8 @@ cd ..
 
 echo  "Copying additional headers"
 cp    "libnfs/include/libnfs-private.h" "${PACKAGE_DIRECTORY}/libnfs/include/"
+cp    "libnfs/nfs/libnfs-raw-nfs.h" "${PACKAGE_DIRECTORY}/libnfs/nfs/"
+cp    "libnfs/nfs4/libnfs-raw-nfs4.h" "${PACKAGE_DIRECTORY}/libnfs/nfs4/"
 cp    "module.modulemap"                  "${PACKAGE_DIRECTORY}/libnfs/include/"
 
 rm -rf libnfs

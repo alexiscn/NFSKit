@@ -1,7 +1,7 @@
-module NFSKit [extern_c] {
+module nfs [extern_c] {
     module libnfs {
-        header "libnfs/libnfs.h"
-        header "libnfs/libnfs-zdr.h.h"
+        header "nfsc/libnfs.h"
+        header "nfsc/libnfs-zdr.h"
     }
     
     module NFSInternal {
@@ -9,8 +9,8 @@ module NFSKit [extern_c] {
     }
     
     explicit module Raw {
-        header "libnfs/libnfs-raw.h"
+        header "nfsc/libnfs-raw.h"
     }
     
-    export libnfs
+    export nfs
 }
