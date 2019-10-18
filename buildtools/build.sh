@@ -1,13 +1,5 @@
 #!/bin/sh
 
-for i in "$@" ; do
-    if [[ $i == "--with-libkrb5" ]] ; then
-        WITH_KRB5="YES"
-        echo "Building with Kerberos 5."
-        break
-    fi
-done
-
 cd ..
 rm -rf "libnfs"
 mkdir  "libnfs"
@@ -40,7 +32,7 @@ else
 fi
 
 export USECLANG=1
-export CFLAGS="-fembed-bitcode -Wno-everything -DHAVE_SOCKADDR_LEN=1 -DHAVE_SOCKADDR_STORAGE=1"
+export CFLAGS="-fembed-bitcode -Wno-everything -DHAVE_GETPWNAM=1 -DHAVE_SOCKADDR_LEN=1 -DHAVE_SOCKADDR_STORAGE=1 -DHAVE_TALLOC_TEVENT=1"
 export CPPFLAGS="-I${PACKAGE_DIRECTORY}/buildtools/include"
 export LDFLAGS="-L${LIB_OUTPUT}"
 
