@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import libnfs
+import nfs
 
 final class NFSContext  {
     

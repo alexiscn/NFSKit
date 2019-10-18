@@ -1,0 +1,16 @@
+module nfs [extern_c] {
+    module libnfs {
+        header "nfsc/libnfs.h"
+        header "nfsc/libnfs-zdr.h"
+    }
+    
+    module NFSInternal {
+        header "libnfs-private.h"
+    }
+    
+    explicit module Raw {
+        header "nfsc/libnfs-raw.h"
+    }
+    
+    export nfs
+}
