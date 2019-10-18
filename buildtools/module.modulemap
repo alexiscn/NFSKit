@@ -1,0 +1,16 @@
+module NFSKit [extern_c] {
+    module libnfs {
+        header "libnfs/libnfs.h"
+        header "libnfs/libnfs-zdr.h.h"
+    }
+    
+    module NFSInternal {
+        header "libnfs-private.h"
+    }
+    
+    explicit module Raw {
+        header "libnfs/libnfs-raw.h"
+    }
+    
+    export libnfs
+}
