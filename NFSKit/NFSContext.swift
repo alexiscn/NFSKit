@@ -13,6 +13,8 @@ final class NFSContext  {
     
     var context: UnsafeMutablePointer<nfs_context>?
     
+    var rpc_context: UnsafeMutablePointer<rpc_context>?
+    
     var timeout: TimeInterval
     
     private var _context_lock = NSLock()
@@ -89,7 +91,7 @@ final class NFSContext  {
     typealias AsyncAwaitHandler<R> = (_ context: UnsafeMutablePointer<nfs_context>, _ cbPtr: UnsafeMutableRawPointer) -> R
     
     @discardableResult
-    func async_await(execute handler: AsyncAwaitHandler<Int32>) throws -> (result: Int32, data: UnsafeMutableRawPointer?) {
+    func async_await(defaultError: POSIXError.Code, execute handler: AsyncAwaitHandler<Int32>) throws -> (result: Int32, data: UnsafeMutableRawPointer?) {
         var cb = CBData()
         let result = try withThreadSafeContext { (context) -> Int32 in
             return handler(context, &cb)
@@ -108,17 +110,22 @@ final class NFSContext  {
 extension NFSContext {
     
     func mount(server: String, exportname: String) throws {
-        try async_await(execute: { (context, cbPtr) -> Int32 in
+        try async_await(defaultError: .ECONNREFUSED, execute: { (context, cbPtr) -> Int32 in
             nfs_mount_async(context, server, exportname, NFSContext.generic_handler, cbPtr)
         })
     }
     
     func unmount() throws {
-        try async_await(execute: { (context, cbPtr) -> Int32 in
+        try async_await(defaultError: .ECONNREFUSED, execute: { (context, cbPtr) -> Int32 in
             nfs_umount_async(context, NFSContext.generic_handler, cbPtr)
         })
     }
     
+    func getexports(server: String) throws {
+//        try async_await(defaultError: .ECONNREFUSED, execute: { (context, cbPtr) -> Int32 in
+//            //mount_getexports_async(context, server, NFSContext.generic_handler, cbPtr)
+//        })
+    }
 }
 
 extension NFSContext {
@@ -154,20 +161,53 @@ extension NFSContext {
     }
 }
 
-
-extension POSIXError {
-    static func throwIfError(_ result: Int32, description: String?, default: POSIXError.Code) throws {
-        guard result < 0 else {
-            return
+// MARK: - File manipulation
+extension NFSContext {
+    func stat(_ path: String) throws {
+        try async_await(defaultError: .ENOLINK) { (context, cbPtr) -> Int32 in
+            nfs_stat64_async(context, path, NFSContext.generic_handler, cbPtr)
         }
-        let errno = -result
-        let code = POSIXErrorCode(rawValue: errno) ?? `default`
-        let errorDesc = description.map { "Error code \(errno): \($0)" }
-        throw POSIXError(code, description: errorDesc)
     }
     
-    init(_ code: POSIXError.Code, description: String?) {
-        let userInfo: [String: Any] = description.map({ [NSLocalizedFailureReasonErrorKey: $0] }) ?? [:]
-        self = POSIXError(code, userInfo: userInfo)
+//    func statvfs()
+    
+    func truncate(_ path: String, toLength: UInt64) throws {
+        
+        try async_await(defaultError: .ENOLINK) { (context, cbPtr) -> Int32 in
+            nfs_truncate_async(context, path, toLength, NFSContext.generic_handler, cbPtr)
+        }
+    }
+}
+
+// MARK: - File Operation
+extension NFSContext {
+    func mkdir(_ path: String) throws {
+        try async_await(defaultError: .EEXIST) { (context, cbPtr) -> Int32 in
+            nfs_mkdir_async(context, path, NFSContext.generic_handler, cbPtr)
+        }
+    }
+    
+    func rmdir(_ path: String) throws {
+        try async_await(defaultError: .ENOLINK) { (context, cbPtr) -> Int32 in
+            nfs_rmdir_async(context, path, NFSContext.generic_handler, cbPtr)
+        }
+    }
+    
+    func unlink(_ path: String) throws {
+        try async_await(defaultError: .ENOLINK) { (context, cbPtr) -> Int32 in
+            nfs_unlink_async(context, path, NFSContext.generic_handler, cbPtr)
+        }
+    }
+    
+    func rename(_ path: String, to newPath: String) throws {
+        try async_await(defaultError: .ENOENT) { (context, cbPtr) -> Int32 in
+            nfs_rename_async(context, path, newPath, NFSContext.generic_handler, cbPtr)
+        }
+    }
+    
+    func create(_ path: String, mode: Int32) throws {
+        try async_await(defaultError: .ENOENT) { (context, cbPtr) -> Int32 in
+            nfs_creat_async(context, path, mode, NFSContext.generic_handler, cbPtr)
+        }
     }
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A367A750235C228E00729AB5 /* NFSDirectory.swift in Sources */ = {isa = PBXBuildFile; fileRef = A367A74F235C228E00729AB5 /* NFSDirectory.swift */; };
 		A36D2354235978E90068D0FF /* NFSKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A36D234A235978E80068D0FF /* NFSKit.framework */; };
 		A36D2359235978E90068D0FF /* NFSKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A36D2358235978E90068D0FF /* NFSKitTests.swift */; };
 		A36D235B235978E90068D0FF /* NFSKit.h in Headers */ = {isa = PBXBuildFile; fileRef = A36D234D235978E80068D0FF /* NFSKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -26,6 +27,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		A367A74F235C228E00729AB5 /* NFSDirectory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NFSDirectory.swift; sourceTree = "<group>"; };
 		A36D234A235978E80068D0FF /* NFSKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = NFSKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		A36D234D235978E80068D0FF /* NFSKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NFSKit.h; sourceTree = "<group>"; };
 		A36D234E235978E80068D0FF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -84,6 +86,7 @@
 				A36D2368235979200068D0FF /* Extensions.swift */,
 				A36D234E235978E80068D0FF /* Info.plist */,
 				A36D236A2359892E0068D0FF /* NFSKit.modulemap */,
+				A367A74F235C228E00729AB5 /* NFSDirectory.swift */,
 			);
 			path = NFSKit;
 			sourceTree = "<group>";
@@ -208,6 +211,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A36D2366235979160068D0FF /* NFSClient.swift in Sources */,
+				A367A750235C228E00729AB5 /* NFSDirectory.swift in Sources */,
 				A36D2369235979200068D0FF /* Extensions.swift in Sources */,
 				A36D2367235979160068D0FF /* NFSContext.swift in Sources */,
 			);
