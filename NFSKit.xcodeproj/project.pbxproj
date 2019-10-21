@@ -14,6 +14,7 @@
 		A36D2366235979160068D0FF /* NFSClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A36D2364235979160068D0FF /* NFSClient.swift */; };
 		A36D2367235979160068D0FF /* NFSContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = A36D2365235979160068D0FF /* NFSContext.swift */; };
 		A36D2369235979200068D0FF /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A36D2368235979200068D0FF /* Extensions.swift */; };
+		A382D4DC235D594F00098F3D /* NFSFileHandle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A382D4DB235D594F00098F3D /* NFSFileHandle.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -38,6 +39,7 @@
 		A36D2365235979160068D0FF /* NFSContext.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NFSContext.swift; sourceTree = "<group>"; };
 		A36D2368235979200068D0FF /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		A36D236A2359892E0068D0FF /* NFSKit.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = NFSKit.modulemap; sourceTree = "<group>"; };
+		A382D4DB235D594F00098F3D /* NFSFileHandle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NFSFileHandle.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,9 +86,10 @@
 				A36D2364235979160068D0FF /* NFSClient.swift */,
 				A36D2365235979160068D0FF /* NFSContext.swift */,
 				A36D2368235979200068D0FF /* Extensions.swift */,
+				A382D4DB235D594F00098F3D /* NFSFileHandle.swift */,
+				A367A74F235C228E00729AB5 /* NFSDirectory.swift */,
 				A36D234E235978E80068D0FF /* Info.plist */,
 				A36D236A2359892E0068D0FF /* NFSKit.modulemap */,
-				A367A74F235C228E00729AB5 /* NFSDirectory.swift */,
 			);
 			path = NFSKit;
 			sourceTree = "<group>";
@@ -213,6 +216,7 @@
 				A36D2366235979160068D0FF /* NFSClient.swift in Sources */,
 				A367A750235C228E00729AB5 /* NFSDirectory.swift in Sources */,
 				A36D2369235979200068D0FF /* Extensions.swift in Sources */,
+				A382D4DC235D594F00098F3D /* NFSFileHandle.swift in Sources */,
 				A36D2367235979160068D0FF /* NFSContext.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
