@@ -9,6 +9,8 @@
 import Foundation
 import nfs
 
+public typealias NFSReadProgressHandler = (_ bytes: Int64) -> Bool
+
 public class NFSClient {
     
     public let url: URL
@@ -121,6 +123,39 @@ extension NFSClient {
             
         }
         return contents
+    }
+    
+}
+
+extension NFSClient {
+    
+    private func read(path: String, range: Range<Int64> = 0..<Int64.max, to stream: OutputStream, progressHandler: NFSReadProgressHandler?) throws {
+        let context = try tryContext()
+        try stream.withOpenStream {
+            var shouldContinue = true
+            var sentBytes: Int64 = 0
+            
+            while shouldContinue {
+                
+            }
+        }
+    }
+    
+    private func write(from stream: InputStream, toPath: String, chunkSize: Int = 0, progressHandler: NFSReadProgressHandler?) throws {
+        let context = try tryContext()
+        do {
+            try stream.withOpenStream {
+                while true {
+                    var segment = try stream.readData(maxLength: chunkSize)
+                    if segment.count == 0 {
+                        break
+                    }
+                }
+            }
+        } catch {
+            try? context.unlink(toPath)
+            throw error
+        }
     }
     
 }

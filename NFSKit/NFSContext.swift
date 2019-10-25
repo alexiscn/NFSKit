@@ -91,7 +91,8 @@ final class NFSContext  {
     typealias AsyncAwaitHandler<R> = (_ context: UnsafeMutablePointer<nfs_context>, _ cbPtr: UnsafeMutableRawPointer) -> R
     
     @discardableResult
-    func async_await(defaultError: POSIXError.Code, execute handler: AsyncAwaitHandler<Int32>) throws -> (result: Int32, data: UnsafeMutableRawPointer?) {
+    func async_await(defaultError: POSIXError.Code, handler: AsyncAwaitHandler<Int32>)
+        throws -> (result: Int32, data: UnsafeMutableRawPointer?) {
         var cb = CBData()
         let result = try withThreadSafeContext { (context) -> Int32 in
             return handler(context, &cb)
@@ -110,15 +111,15 @@ final class NFSContext  {
 extension NFSContext {
     
     func mount(server: String, exportname: String) throws {
-        try async_await(defaultError: .ECONNREFUSED, execute: { (context, cbPtr) -> Int32 in
+        try async_await(defaultError: .ECONNREFUSED) { (context, cbPtr) -> Int32 in
             nfs_mount_async(context, server, exportname, NFSContext.generic_handler, cbPtr)
-        })
+        }
     }
     
     func unmount() throws {
-        try async_await(defaultError: .ECONNREFUSED, execute: { (context, cbPtr) -> Int32 in
+        try async_await(defaultError: .ECONNREFUSED) { (context, cbPtr) -> Int32 in
             nfs_umount_async(context, NFSContext.generic_handler, cbPtr)
-        })
+        }
     }
     
     func getexports(server: String) throws {
