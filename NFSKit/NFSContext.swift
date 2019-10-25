@@ -164,13 +164,25 @@ extension NFSContext {
 
 // MARK: - File manipulation
 extension NFSContext {
-    func stat(_ path: String) throws {
-        try async_await(defaultError: .ENOLINK) { (context, cbPtr) -> Int32 in
+    func stat(_ path: String) throws -> nfs_stat_64 {
+        let (_, cmddata) = try async_await(defaultError: .ENOLINK) { (context, cbPtr) -> Int32 in
             nfs_stat64_async(context, path, NFSContext.generic_handler, cbPtr)
         }
+        guard let st = cmddata?.bindMemory(to: nfs_stat_64.self, capacity: 1).pointee else {
+            throw POSIXError(.ENOLINK)
+        }
+        return st
     }
     
-//    func statvfs()
+    func statvfs(_ path: String) throws -> nfs_statvfs_64 {
+        let (_, cmddata) = try async_await(defaultError: .ENOLINK) { (context, cbPtr) -> Int32 in
+            nfs_statvfs_async(context, path, NFSContext.generic_handler, cbPtr)
+        }
+        guard let st = cmddata?.bindMemory(to: nfs_statvfs_64.self, capacity: 1).pointee else {
+            throw POSIXError(.ENOLINK)
+        }
+        return st
+    }
     
     func truncate(_ path: String, toLength: UInt64) throws {
         

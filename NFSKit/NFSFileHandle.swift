@@ -23,8 +23,33 @@ final class NFSFileHandle {
     private var context: NFSContext
     private var _handle: UnsafeMutablePointer<nfsfh>?
     
+    convenience init(forReadingAtPath path: String, on context: NFSContext) throws {
+        try self.init(path, flags: O_RDONLY, on: context)
+    }
+    
+    convenience init(forWritingAtPath path: String, on context: NFSContext) throws {
+        try self.init(path, flags: O_WRONLY, on: context)
+    }
+    
+    convenience init(forCreatingAndWritingAtPath path: String, on context: NFSContext) throws {
+        try self.init(path, flags: O_WRONLY | O_CREAT | O_EXCL, on: context)
+    }
+    
     init(fileDescriptor: fileid3, on context: NFSContext) {
         self.context = context
+        //var fileDescriptor = fileDescriptor
+        //self._handle = getfh
+    }
+    
+    private init(_ path: String, flags: Int32, on context: NFSContext) throws {
+        let (_, cmddata) = try context.async_await(defaultError: .ENOENT) { (context, cbPtr) -> Int32 in
+            nfs_open_async(context, path, flags, NFSContext.generic_handler, cbPtr)
+        }
+        guard let handle = cmddata?.bindMemory(to: UnsafeMutablePointer<nfsfh>.self, capacity: 1).pointee else {
+            throw POSIXError(.ENOENT)
+        }
+        self.context = context
+        self._handle = handle
     }
     
     func fstat() throws -> nfs_stat_64 {
