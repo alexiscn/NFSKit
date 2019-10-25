@@ -157,12 +157,70 @@ public class NFSClient {
         }
     }
     
+    /// Truncates or extends the file represented by the path to a specified offset within the
+    /// file and puts the file pointer at that position.
+    /// If the file is extended (if offset is beyond the current end of file), the added characters are null bytes.
+    /// - Parameter path: path of file to be truncated.
+    /// - Parameter atOffset: final size of truncated file.
+    /// - Parameter completionHandler: closure will be run after operation is completed.
+    public func truncateFile(atPath path: String, atOffset: UInt64, completionHandler: NFSCompletionHandler) {
+        with(completionHandler: completionHandler) { context in
+            try context.truncate(path, toLength: atOffset)
+        }
+    }
+    
+    /// Moves/Renames an existing file at given path to a new location.
+    /// - Parameter path: path of file to be move.
+    /// - Parameter toPath: new location of file.
+    /// - Parameter completionHandler: closure will be run after operation is completed.
     public func moveItem(atPath path: String, toPath: String, completionHandler: NFSCompletionHandler) {
         with(completionHandler: completionHandler) { context in
             try context.rename(path, to: toPath)
         }
     }
     
+    
+    /// Fetches whole data contents of a file. With reporting progress on about every 1MiB.
+    /// - Parameter path: path of file to be fetched.
+    /// - Parameter progressHandler: reports progress of recieved bytes count read and expected content length.
+    /// - Parameter completionHandler: closure will be run after reading data is completed.
+    public func contents(atPath path: String,
+                         progressHandler: NFSReadProgressHandler,
+                         completionHandler: @escaping (Result<Data, Error>) -> Void) {
+        contents(atPath: path, range: 0..<Int64.max, progressHandler: progressHandler, completionHandler: completionHandler)
+    }
+    
+    
+    /// Fetches data contents of a file from an offset with specified length. With reporting progress on about every 1MiB.
+    /// Note: If range's lowerBound is bigger than file's size, an empty `Data` will be returned.
+    /// Note: If range's length exceeds file, returned data will be truncated to entire file content from given offset.
+    /// - Parameter path: path of file to be fetched.
+    /// - Parameter range: byte range that should be read, default value is whole file. e.g. `..<10` will read first ten bytes.
+    /// - Parameter progressHandler: reports progress of recieved bytes count read and expected content length.
+    /// - Parameter completionHandler: closure will be run after reading data is completed.
+    public func contents<R: RangeExpression>(atPath path: String,
+                                             range: R? = nil,
+                                             progressHandler: NFSReadProgressHandler,
+                                             completionHandler: @escaping (Result<Data, Error>) -> Void)
+        where R.Bound: FixedWidthInteger {
+        let range: Range<R.Bound> = range?.relative(to: 0..<R.Bound.max) ?? 0..<R.Bound.max
+        let lower = Int64(exactly: range.lowerBound) ?? (Int64.max - 1)
+        let upper = Int64(exactly: range.upperBound) ?? Int64.max
+        let int64Range = lower..<upper
+        
+        with(completionHandler: completionHandler) { context in
+            guard !int64Range.isEmpty else {
+                return Data()
+            }
+            
+            let stream = OutputStream.toMemory()
+            try self.read(path: path, range: int64Range, to: stream, progressHandler: progressHandler)
+            guard let data = stream.property(forKey: .dataWrittenToMemoryStreamKey) as? Data else {
+                throw POSIXError(.ENOMEM, description: "Data missed from stream")
+            }
+            return data
+        }
+    }
     
     /// Copy files to a new location. With reporting progress on about every 1MiB.
     /// - Parameter path: path of file to be copied from.
@@ -245,7 +303,7 @@ public extension NFSClient {
     }
     
     private func setupContext(_ context: NFSContext) {
-        
+        context.timeout = _timeout
     }
     
     private func tryContext() throws -> NFSContext {
@@ -318,9 +376,17 @@ extension NFSClient {
             contents.append(result)
         }
         if recursive {
-            
+            let subDirectories = contents.filter { $0.fileType == .directory }
+            for subDir in subDirectories {
+                guard let path = subDir.filePath else { continue }
+                contents.append(contentsOf: try listDirectory(path: path, recursive: true))
+            }
         }
         return contents
+    }
+    
+    private func copyFile(atPath path: String, toPath: String, progress: CopyProgressHandler) {
+        
     }
     
     private func copyContentsOfFile(atPath path: String, toPath: String, progressHandler: CopyProgressHandler) throws -> Bool {
