@@ -47,12 +47,23 @@ public class NFSClient {
         self._timeout = 60.0
     }
     
+    public func connect(relativePath: String = "", completionHandler: @escaping (_ error: Error?) -> Void) {
+        with(completionHandler: completionHandler) {
+            self.connectLock.lock()
+            defer { self.connectLock.unlock() }
+            if self.context == nil || self.context?.fileDescriptor == -1 {
+                
+            }
+        }
+    }
+    
     public func mount(exportname: String, completion: @escaping (_ error: Error?) -> Void) {
         
         func establishContext() throws {
             let context = try NFSContext(timeout: _timeout)
             self.context = context
             setupContext(context)
+            
             //try context.mount(server: <#T##String#>, exportname: exportname)
         }
     }
@@ -105,7 +116,16 @@ public class NFSClient {
             let name = (path as NSString).lastPathComponent
             result[.nameKey] = name
             result[.pathKey] = (path as NSString).appendingPathComponent(name)
-            // TODO
+            result[.fileSizeKey] = NSNumber(value: stat.nfs_size)
+            result[.linkCountKey] = NSNumber(value: stat.nfs_nlink)
+            result[.documentIdentifierKey] = NSNumber(value: stat.nfs_ino)
+            result[.contentModificationDateKey] = Date(timespec(tv_sec: Int(stat.nfs_mtime), tv_nsec: Int(stat.nfs_mtime_nsec)))
+            result[.attributeModificationDateKey] = Date(timespec(tv_sec: Int(stat.nfs_ctime), tv_nsec: Int(stat.nfs_ctime_nsec)))
+            result[.contentAccessDateKey] = Date(timespec(tv_sec: Int(stat.nfs_atime), tv_nsec: Int(stat.nfs_atime_nsec)))
+            result[.creationDateKey] = Date(timespec(tv_sec: Int(stat.nfs_ctime), tv_nsec: Int(stat.nfs_ctime_nsec)))
+            let mode = UInt16(stat.nfs_mode) & S_IFMT
+            result[.isDirectoryKey] = NSNumber(value: mode == S_IFDIR)
+            //let isLink = mode == S_IFLNK
             return result
         }
     }
@@ -352,10 +372,7 @@ public extension NFSClient {
 extension NFSClient {
     
     //    private func populateResourceValue(_ dict: inout [URLResourceKey: Any], stat: nfs_stat_64) {
-    //        dict[.contentModificationDateKey] = Date(timespec(tv_sec: Int(stat.nfs_mtime), tv_nsec: Int(stat.nfs_mtime_nsec)))
-    //        dict[.attributeModificationDateKey] = Date(timespec(tv_sec: Int(stat.nfs_ctime), tv_nsec: Int(stat.nfs_ctime_nsec)))
-    //        dict[.contentAccessDateKey] = Date(timespec(tv_sec: Int(stat.nfs_atime), tv_nsec: Int(stat.nfs_atime_nsec)))
-    //        dict[.creationDateKey] = Date(timespec(tv_sec: Int(stat.nfs_ctime), tv_nsec: Int(stat.nfs_ctime_nsec)))
+    
     //    }
     
     private func listDirectory(path: String, recursive: Bool) throws -> [[URLResourceKey: Any]] {
