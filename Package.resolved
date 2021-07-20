@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "nfs",
+        "repositoryURL": "https://github.com/alexiscn/nfs.git",
+        "state": {
+          "branch": "main",
+          "revision": "a029f39f735c6b1414b46b5b78faa4fdf119e466",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}

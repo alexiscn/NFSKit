@@ -1,22 +1,14 @@
-# NFSKit
+import XCTest
+@testable import NFSKit
 
-A Swift Wrapper around [libnfs](https://github.com/sahlberg/libnfs), code heavily borrowed from [AMSMB2](https://github.com/amosavian/AMSMB2). Thanks [amosavian](https://github.com/amosavian) and [sahlberg](https://github.com/sahlberg) for the great work.
-
-# Install
-
-NFSKit only supports installation through Swift Package Manager.
-
-```bash
-dependencies: [
-    .package(url: "https://github.com/alexiscn/NFSKit.git", branch: "main")
-]
-```
-
-# Get started
-
-Just read inline help to find what each function does. It's straightforward. It's thread safe and any queue.
-
-```swift
+final class NFSKitTests: XCTestCase {
+    
+    func testExample() {
+        // This is an example of a functional test case.
+        // Use XCTAssert and related functions to verify your tests produce the correct
+        // results.
+    }
+}
 
 class NFSBrowser {
     
@@ -106,8 +98,3 @@ class NFSBrowser {
         }
     }
 }
-```
-
-# License
-
-While NFSKit source code shipped with project is MIT licensed, but libnfs which is `LGPL v2.1`.
