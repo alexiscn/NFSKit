@@ -17,6 +17,8 @@ public class NFSClient: NSObject {
     
     public let url: URL
     
+    
+    /// The guid.
     public private(set) var gid: Int32 = 0
     public private(set) var uid: Int32 = 0
     
@@ -42,6 +44,9 @@ public class NFSClient: NSObject {
         }
     }
     
+    /// Initializes a NFSClient class with given url
+    /// - Parameter url: The nfs url, should has with nfs:// scheme
+    /// - Throws: error
     public init?(url: URL) throws {
         let hostLabel = url.host.map({ "_" + $0 }) ?? ""
         self.q = DispatchQueue(label: "nfs_queue\(hostLabel)", qos: .default, attributes: .concurrent)
@@ -50,6 +55,11 @@ public class NFSClient: NSObject {
         self.context = try NFSContext(timeout: _timeout)
     }
     
+    
+    /// Mount the export
+    /// - Parameters:
+    ///   - export: export name to be mounted.
+    ///   - completionHandler: closure will be run after enumerating is completed.
     open func connect(export: String, completionHandler: @escaping ((_ error: Error?) -> Void)) {
         with(completionHandler: completionHandler) {
             self.connectLock.lock()
@@ -68,6 +78,35 @@ public class NFSClient: NSObject {
         }
     }
     
+    /// Umount export.
+    /// - Parameters:
+    ///   - export: export to be umount
+    ///   - gracefully: waits until all queued operations are done before disconnecting from server. Default value is `false`.
+    ///   - completionHandler: closure will be run after enumerating is completed.
+    open func disconnect(export: String, gracefully: Bool = false, completionHandler: CompletionHandler = nil) {
+        q.async {
+            do {
+                self.connectLock.lock()
+                defer { self.connectLock.unlock() }
+                if gracefully {
+                    self.operationLock.lock()
+                    while self.operationCount > 0 {
+                        self.operationLock.wait()
+                    }
+                    self.operationLock.unlock()
+                }
+                try self.context?.disconnect()
+                self.context = nil
+                completionHandler?(nil)
+            } catch {
+                completionHandler?(error)
+            }
+        }
+    }
+    
+    
+    /// List the exports of NFS server.
+    /// - Parameter completionHandler: closure will be run after enumerating is completed.
     open func listExports(completionHandler: @escaping (_ result: Result<[String], Error>) -> Void) {
         queue {
             do {
