@@ -104,7 +104,7 @@ extension NFSContext {
     var isConnected: Bool {
         do {
             return try withThreadSafeContext { (context) -> Bool in
-                context.pointee.rpc.pointee.is_connected != 0
+                context.pointee.server != nil && context.pointee.rpc.pointee.is_connected != 0
             }
         } catch {
             return false
@@ -193,7 +193,7 @@ extension NFSContext {
     private class CBData {
         var result: Int32 = 0
         var isFinished: Bool = false
-        var dataHandler: ((UnsafeMutableRawPointer?) -> Void)? = nil
+        var dataHandler: ((Int32, UnsafeMutableRawPointer?) -> Void)? = nil
         var status: UInt32 {
             return UInt32(bitPattern: result)
         }
@@ -227,7 +227,7 @@ extension NFSContext {
             if error != 0 {
                 cbdata.result = error
             }
-            cbdata.dataHandler?(data)
+            cbdata.dataHandler?(error, data)
             cbdata.isFinished = true
         } catch { }
     }
@@ -238,7 +238,7 @@ extension NFSContext {
             if status != 0 {
                 cbdata.result = status
             }
-            cbdata.dataHandler?(data)
+            cbdata.dataHandler?(status, data)
             cbdata.isFinished = true
         } catch { }
     }
@@ -265,8 +265,9 @@ extension NFSContext {
             var cb = CBData()
             var resultData: DataType?
             var dataHandlerError: Error?
-            cb.dataHandler = { ptr in
+            cb.dataHandler = { status, ptr in
                 do {
+                    try POSIXError.throwIfError(status, description: self.error)
                     resultData = try dataHandler(context, ptr)
                 } catch {
                     dataHandlerError = error
