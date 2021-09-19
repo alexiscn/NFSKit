@@ -141,12 +141,14 @@ extension NFSContext {
     }
     
     func service(revents: Int32) throws {
-        let result = nfs_service(context, revents)
-        if result < 0 {
-            self.context = nil
-            nfs_destroy_context(context)
+        try withThreadSafeContext { context in
+            let result = nfs_service(context, revents)
+            if result < 0 {
+                self.context = nil
+                nfs_destroy_context(context)
+            }
+            try POSIXError.throwIfError(result, description: error)
         }
-        try POSIXError.throwIfError(result, description: error)
     }
     
 }
