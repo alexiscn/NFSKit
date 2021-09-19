@@ -130,6 +130,9 @@ extension NFSContext {
     }
     
     var error: String? {
+        if context == nil {
+            return nil
+        }
         if let errorStr = nfs_get_error(context) {
             return String(cString: errorStr)
         }
