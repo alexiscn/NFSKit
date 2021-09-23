@@ -94,7 +94,8 @@ class NFSFileHandle {
     
     /// This value allows softer streaming
     var optimizedReadSize: Int {
-        return min(maxReadSize, 1048576)
+        return 4 * 1024 * 1024
+        //return min(maxReadSize, 1048576)
     }
     
     @discardableResult
