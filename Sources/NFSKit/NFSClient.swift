@@ -247,7 +247,8 @@ public class NFSClient: NSObject {
         */
     open func removeItem(atPath path: String, completionHandler: CompletionHandler) {
         with(completionHandler: completionHandler) { context in
-            switch try context.stat(path).nfs_mode {
+            let mode = try context.stat(path).nfs_mode
+            switch mode & UInt64(S_IFMT) {
             case UInt64(S_IFDIR):
                 try self.removeDirectory(context: context, path: path, recursive: true)
             case UInt64(S_IFREG), UInt64(S_IFLNK):
