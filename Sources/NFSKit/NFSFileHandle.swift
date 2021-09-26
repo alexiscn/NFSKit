@@ -104,7 +104,7 @@ class NFSFileHandle {
         if result < 0 {
             try POSIXError.throwIfError(Int32(result), description: context.error)
         }
-        return Int64(result)
+        return Int64(handle.pointee.offset)
     }
     
     func read(length: Int = 0) throws -> Data {
