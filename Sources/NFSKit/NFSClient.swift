@@ -81,7 +81,7 @@ public class NFSClient: NSObject {
     /// Mount the export
     /// - Parameters:
     ///   - export: export name to be mounted.
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func connect(export: String) async -> Error? {
         return await withCheckedContinuation { continuation in
             connect(export: export) { result in
@@ -124,7 +124,7 @@ public class NFSClient: NSObject {
     /// - Parameters:
     ///   - export: export to be umount
     ///   - gracefully: waits until all queued operations are done before disconnecting from server. Default value is `false`.
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func disconnect(export: String, gracefully: Bool = false) async throws{
         return await withCheckedContinuation { continuation in
             disconnect(export: export, gracefully: gracefully) { result in
@@ -148,7 +148,7 @@ public class NFSClient: NSObject {
     }
     
     /// List the exports of NFS server.
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func listExports() async throws -> Result<[String], Error> {
         return await withCheckedContinuation{continuation in
             listExports() { result in
@@ -181,7 +181,7 @@ public class NFSClient: NSObject {
        - recursive: subdirectories will enumerated if `true`.
        - result: An array of `[URLResourceKey: Any]` which holds files' attributes. file name is stored in `.nameKey`.
      */
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func contentsOfDirectory(atPath path: String, recursive: Bool = false) async -> Result<[[URLResourceKey: Any]], Error> {
         return await withCheckedContinuation{ continuation in
             contentsOfDirectory(atPath: path, recursive: recursive) { result in
@@ -226,7 +226,7 @@ public class NFSClient: NSObject {
        - result: A dictionary object that describes the attributes of the mounted file system on which path resides.
            See _File-System Attribute Keys_ for a description of the keys available in the dictionary.
      */
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func attributesOfFileSystem(forPath path: String) async -> Result<[FileAttributeKey: Any], Error> {
         return await withCheckedContinuation { continuation in
             attributesOfFileSystem(forPath: path) { result in
@@ -263,7 +263,7 @@ public class NFSClient: NSObject {
        - atPath: path of file to be enumerated.
        - result: An dictionary with `URLResourceKey` as key which holds file's attributes.
      */
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func attributesOfItem(atPath path: String) async -> Result<[URLResourceKey: Any], Error> {
         return await withCheckedContinuation { continuation in
             attributesOfItem(atPath: path) { result in
@@ -296,7 +296,7 @@ public class NFSClient: NSObject {
       - result: An String object containing the path of the directory or file to which the symbolic link path refers.
                 If the symbolic link is specified as a relative path, that relative path is returned.
     */
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func destinationOfSymbolicLink(atPath path: String) async -> Result<String, Error> {
         return await withCheckedContinuation { continuation in
             destinationOfSymbolicLink(atPath: path) { result in
@@ -324,7 +324,7 @@ public class NFSClient: NSObject {
      - Parameters:
        - atPath: path of new directory to be created.
      */
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func createDirectory(atPath path: String) async {
         return await withCheckedContinuation{ continuation in
             createDirectory(atPath: path) { result in
@@ -354,7 +354,7 @@ public class NFSClient: NSObject {
        - atPath: path of directory to be removed.
        - recursive: children items will be deleted if `true`.
      */
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func removeDirectory(atPath path: String, recursive: Bool) async {
         return await withCheckedContinuation { continuation in
             removeDirectory(atPath: path, recursive: recursive) { result in
@@ -382,7 +382,7 @@ public class NFSClient: NSObject {
      - Parameters:
        - atPath: path of file to be removed.
      */
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func removeFile(atPath path: String) async {
         return await withCheckedContinuation { continuation in
             removeFile(atPath: path) { result in
@@ -412,7 +412,7 @@ public class NFSClient: NSObject {
         }
     }
     
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func removeItem(atPath path: String) async {
         return await withCheckedContinuation { continuation in
             removeItem(atPath: path) { result in
@@ -448,7 +448,7 @@ public class NFSClient: NSObject {
        - atPath: path of file to be truncated.
        - atOffset: final size of truncated file.
      */
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func truncateFile(atPath path: String, atOffset: UInt64) async {
         return await withCheckedContinuation { continuation in
             truncateFile(atPath: path, atOffset: atOffset) { result in
@@ -478,7 +478,7 @@ public class NFSClient: NSObject {
        - atPath: path of file to be move.
        - toPath: new location of file.
      */
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func moveItem(atPath path: String, toPath: String) async {
         return await withCheckedContinuation { continuation in
             moveItem(atPath: path, toPath: toPath) { result in
@@ -515,7 +515,7 @@ public class NFSClient: NSObject {
        - total: expected content length.
        - result: a `Data` object which contains file contents.
      */
-    @available(macOS 10.15, *)
+    @available(macOS 10.15, iOS 13, *)
     open func contents(atPath path: String, progress: ReadProgressHandler) async {
         return await withCheckedContinuation { continuation in
             contents(atPath: path, progress: progress) { result in
