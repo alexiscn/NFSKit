@@ -78,6 +78,22 @@ public class NFSClient: NSObject {
         }
     }
     
+    /// Mount the export
+    /// - Parameters:
+    ///   - export: export name to be mounted.
+    @available(macOS 10.15, *)
+    open func connect(export: String) async -> Error? {
+        return await withCheckedContinuation { continuation in
+            connect(export: export) { result in
+                if let error = result {
+                    continuation.resume(returning: error)
+                } else {
+                    continuation.resume(returning: result)
+                }
+            }
+        }
+    }
+    
     /// Umount export.
     /// - Parameters:
     ///   - export: export to be umount
@@ -104,6 +120,19 @@ public class NFSClient: NSObject {
         }
     }
     
+    /// Umount export.
+    /// - Parameters:
+    ///   - export: export to be umount
+    ///   - gracefully: waits until all queued operations are done before disconnecting from server. Default value is `false`.
+    @available(macOS 10.15, *)
+    open func disconnect(export: String, gracefully: Bool = false) async throws{
+        return await withCheckedContinuation { continuation in
+            disconnect(export: export, gracefully: gracefully) { result in
+                continuation.resume()
+            }
+        }
+    }
+    
     
     /// List the exports of NFS server.
     /// - Parameter completionHandler: closure will be run after enumerating is completed.
@@ -114,6 +143,16 @@ public class NFSClient: NSObject {
                 completionHandler(.success(result))
             } catch {
                 completionHandler(.failure(error))
+            }
+        }
+    }
+    
+    /// List the exports of NFS server.
+    @available(macOS 10.15, *)
+    open func listExports() async throws -> Result<[String], Error> {
+        return await withCheckedContinuation{continuation in
+            listExports() { result in
+                continuation.resume(returning: result)
             }
         }
     }
@@ -131,6 +170,23 @@ public class NFSClient: NSObject {
                                   completionHandler: @escaping (_ result: Result<[[URLResourceKey: Any]], Error>) -> Void) {
         with(completionHandler: completionHandler) { context in
             return try self.listDirectory(context: context, path: path, recursive: recursive)
+        }
+    }
+    
+    /**
+     Enumerates directory contents in the give path.
+     
+     - Parameters:
+       - atPath: path of directory to be enumerated.
+       - recursive: subdirectories will enumerated if `true`.
+       - result: An array of `[URLResourceKey: Any]` which holds files' attributes. file name is stored in `.nameKey`.
+     */
+    @available(macOS 10.15, *)
+    open func contentsOfDirectory(atPath path: String, recursive: Bool = false) async -> Result<[[URLResourceKey: Any]], Error> {
+        return await withCheckedContinuation{ continuation in
+            contentsOfDirectory(atPath: path, recursive: recursive) { result in
+                continuation.resume(returning: result)
+            }
         }
     }
     
@@ -163,6 +219,23 @@ public class NFSClient: NSObject {
     }
     
     /**
+     Returns a dictionary that describes the attributes of the mounted file system on which a given path resides.
+     
+     - Parameters:
+       - forPath: Any pathname within the mounted file system.
+       - result: A dictionary object that describes the attributes of the mounted file system on which path resides.
+           See _File-System Attribute Keys_ for a description of the keys available in the dictionary.
+     */
+    @available(macOS 10.15, *)
+    open func attributesOfFileSystem(forPath path: String) async -> Result<[FileAttributeKey: Any], Error> {
+        return await withCheckedContinuation { continuation in
+            attributesOfFileSystem(forPath: path) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+    
+    /**
      Returns the attributes of the item at given path.
      
      - Parameters:
@@ -184,6 +257,22 @@ public class NFSClient: NSObject {
     }
     
     /**
+     Returns the attributes of the item at given path.
+     
+     - Parameters:
+       - atPath: path of file to be enumerated.
+       - result: An dictionary with `URLResourceKey` as key which holds file's attributes.
+     */
+    @available(macOS 10.15, *)
+    open func attributesOfItem(atPath path: String) async -> Result<[URLResourceKey: Any], Error> {
+        return await withCheckedContinuation { continuation in
+            attributesOfItem(atPath: path) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+    
+    /**
     Returns the path of the item pointed to by a symbolic link.
     
     - Parameters:
@@ -200,6 +289,23 @@ public class NFSClient: NSObject {
     }
     
     /**
+    Returns the path of the item pointed to by a symbolic link.
+    
+    - Parameters:
+      - atPath: The path of a file or directory.
+      - result: An String object containing the path of the directory or file to which the symbolic link path refers.
+                If the symbolic link is specified as a relative path, that relative path is returned.
+    */
+    @available(macOS 10.15, *)
+    open func destinationOfSymbolicLink(atPath path: String) async -> Result<String, Error> {
+        return await withCheckedContinuation { continuation in
+            destinationOfSymbolicLink(atPath: path) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+    
+    /**
      Creates a new directory at given path.
      
      - Parameters:
@@ -211,6 +317,22 @@ public class NFSClient: NSObject {
             try context.mkdir(path)
         }
     }
+    
+    /**
+     Creates a new directory at given path.
+     
+     - Parameters:
+       - atPath: path of new directory to be created.
+     */
+    @available(macOS 10.15, *)
+    open func createDirectory(atPath path: String) async {
+        return await withCheckedContinuation{ continuation in
+            createDirectory(atPath: path) { result in
+                continuation.resume()
+            }
+        }
+    }
+    
     /**
      Removes an existing directory at given path.
      
@@ -226,6 +348,22 @@ public class NFSClient: NSObject {
     }
     
     /**
+     Removes an existing directory at given path.
+     
+     - Parameters:
+       - atPath: path of directory to be removed.
+       - recursive: children items will be deleted if `true`.
+     */
+    @available(macOS 10.15, *)
+    open func removeDirectory(atPath path: String, recursive: Bool) async {
+        return await withCheckedContinuation { continuation in
+            removeDirectory(atPath: path, recursive: recursive) { result in
+                continuation.resume()
+            }
+        }
+    }
+    
+    /**
      Removes an existing file at given path.
      
      - Parameters:
@@ -235,6 +373,21 @@ public class NFSClient: NSObject {
     open func removeFile(atPath path: String, completionHandler: CompletionHandler) {
         with(completionHandler: completionHandler) { context in
             try context.unlink(path)
+        }
+    }
+    
+    /**
+     Removes an existing file at given path.
+     
+     - Parameters:
+       - atPath: path of file to be removed.
+     */
+    @available(macOS 10.15, *)
+    open func removeFile(atPath path: String) async {
+        return await withCheckedContinuation { continuation in
+            removeFile(atPath: path) { result in
+                continuation.resume()
+            }
         }
     }
     
@@ -259,6 +412,15 @@ public class NFSClient: NSObject {
         }
     }
     
+    @available(macOS 10.15, *)
+    open func removeItem(atPath path: String) async {
+        return await withCheckedContinuation { continuation in
+            removeItem(atPath: path) { result in
+                continuation.resume()
+            }
+        }
+    }
+    
     /**
      Truncates or extends the file represented by the path to a specified offset within the file and
      puts the file pointer at that position.
@@ -277,6 +439,25 @@ public class NFSClient: NSObject {
     }
     
     /**
+     Truncates or extends the file represented by the path to a specified offset within the file and
+     puts the file pointer at that position.
+     
+     If the file is extended (if offset is beyond the current end of file), the added characters are null bytes.
+     
+     - Parameters:
+       - atPath: path of file to be truncated.
+       - atOffset: final size of truncated file.
+     */
+    @available(macOS 10.15, *)
+    open func truncateFile(atPath path: String, atOffset: UInt64) async {
+        return await withCheckedContinuation { continuation in
+            truncateFile(atPath: path, atOffset: atOffset) { result in
+                continuation.resume()
+            }
+        }
+    }
+    
+    /**
      Moves/Renames an existing file at given path to a new location.
      
      - Parameters:
@@ -287,6 +468,22 @@ public class NFSClient: NSObject {
     open func moveItem(atPath path: String, toPath: String, completionHandler: CompletionHandler) {
         with(completionHandler: completionHandler) { context in
             try context.rename(path, to: toPath)
+        }
+    }
+    
+    /**
+     Moves/Renames an existing file at given path to a new location.
+     
+     - Parameters:
+       - atPath: path of file to be move.
+       - toPath: new location of file.
+     */
+    @available(macOS 10.15, *)
+    open func moveItem(atPath path: String, toPath: String) async {
+        return await withCheckedContinuation { continuation in
+            moveItem(atPath: path, toPath: toPath) { result in
+                continuation.resume()
+            }
         }
     }
     
@@ -305,6 +502,26 @@ public class NFSClient: NSObject {
     open func contents(atPath path: String, progress: ReadProgressHandler,
                        completionHandler: @escaping (_ result: Result<Data, Error>) -> Void) {
         contents(atPath: path, range: 0..<Int64.max, progress: progress, completionHandler: completionHandler)
+    }
+    
+    /**
+     Fetches whole data contents of a file. With reporting progress on about every 1MiB.
+     
+     - Parameters:
+       - atPath: path of file to be fetched.
+       - progress: reports progress of recieved bytes count read and expected content length.
+           User must return `true` if they want to continuing or `false` to abort reading.
+       - bytes: recieved bytes count.
+       - total: expected content length.
+       - result: a `Data` object which contains file contents.
+     */
+    @available(macOS 10.15, *)
+    open func contents(atPath path: String, progress: ReadProgressHandler) async {
+        return await withCheckedContinuation { continuation in
+            contents(atPath: path, progress: progress) { result in
+                continuation.resume()
+            }
+        }
     }
     
     /**
@@ -345,6 +562,33 @@ public class NFSClient: NSObject {
     }
     
     /**
+     Fetches data contents of a file from an offset with specified length. With reporting progress
+     on about every 1MiB.
+     
+     - Note: If range's lowerBound is bigger than file's size, an empty `Data` will be returned.
+             If range's length exceeds file, returned data will be truncated to entire file content from given offset.
+     
+     - Parameters:
+       - atPath: path of file to be fetched.
+       - range: byte range that should be read, default value is whole file. e.g. `..<10` will read first ten bytes.
+       - progress: reports progress of recieved bytes count read and expected content length.
+           User must return `true` if they want to continuing or `false` to abort reading.
+       - bytes: recieved bytes count.
+       - total: expected content length.
+       - result: a `Data` object which contains file contents.
+     */
+    @available(macOS 10.15, iOS 13, *)
+    open func contents<R: RangeExpression>(atPath path: String, range: R? = nil, progress: ReadProgressHandler) async -> Result<Data, Error>
+        where R.Bound: FixedWidthInteger
+    {
+        return await withCheckedContinuation { continuation in
+            contents(atPath: path, range: range, progress: progress) { result in
+                continuation.resume(returning: result)
+            }
+        }
+    }
+    
+    /**
      Streams data contents of a file from an offset with specified length. With reporting data and progress
      on about every 1MiB.
      
@@ -379,6 +623,30 @@ public class NFSClient: NSObject {
     }
     
     /**
+     Streams data contents of a file from an offset with specified length. With reporting data and progress
+     on about every 1MiB.
+     
+     - Parameters:
+       - atPath: path of file to be fetched.
+       - offset: first byte of file to be read, starting from zero.
+       - fetchedData: returns data portion fetched and recieved bytes count read and expected content length.
+           User must return `true` if they want to continuing or `false` to abort reading.
+       - offset: offset of first byte of data portion in file.
+       - total: expected content length.
+       - data: data portion which read from server.
+       - completionHandler: closure will be run after reading data is completed.
+     */
+    @available(macOS 10.15, iOS 13, *)
+    open func contents(atPath path: String, offset: Int64 = 0, fetchedData: @escaping ((_ offset: Int64, _ total: Int64, _ data: Data) -> Bool)) async
+    {
+        return await withCheckedContinuation { continuation in
+            contents(atPath: path, offset: offset, fetchedData: fetchedData) { result in
+                continuation.resume()
+            }
+        }
+    }
+    
+    /**
      Creates and writes data to file. With reporting progress on about every 1MiB.
      
      - Note: Data saved in server maybe truncated when completion handler returns error.
@@ -395,6 +663,27 @@ public class NFSClient: NSObject {
                                             completionHandler: CompletionHandler) {
         with(completionHandler: completionHandler) { context in
             try self.write(context: context, from: InputStream(data: Data(data)), toPath: path, progress: progress)
+        }
+    }
+    
+    /**
+     Creates and writes data to file. With reporting progress on about every 1MiB.
+     
+     - Note: Data saved in server maybe truncated when completion handler returns error.
+     
+     - Parameters:
+       - data: data that must be written to file. You can pass either `Data`, `[UInt8]` or `NSData` object.
+       - toPath: path of file to be written.
+       - progress: reports progress of written bytes count so far.
+           User must return `true` if they want to continuing or `false` to abort writing.
+       - bytes: written bytes count.
+     */
+    @available(macOS 10.15, iOS 13, *)
+    open func write<DataType: DataProtocol>(data: DataType, toPath path: String, progress: WriteProgressHandler) async {
+        return await withCheckedContinuation { continuation in
+            write(data: data, toPath: path, progress: progress) { result in
+                continuation.resume()
+            }
         }
     }
     
@@ -422,6 +711,30 @@ public class NFSClient: NSObject {
     }
     
     /**
+     Creates and writes input stream to file. With reporting progress on about every 1MiB.
+     
+     - Note: Data saved in server maybe truncated when completion handler returns error.
+     
+     - Important: Stream will be closed eventually if is not already opened when passed.
+     
+     - Parameters:
+       - stream: input stream that provides data to be written to file.
+       - toPath: path of file to be written.
+       - chunkSize: optimized chunk size to read from stream. Default value is abount 1MB.
+       - progress: reports progress of written bytes count so far.
+           User must return `true` if they want to continuing or `false` to abort writing.
+       - bytes: written bytes count.
+     */
+    @available(macOS 10.15, iOS 13, *)
+    open func write(stream: InputStream, toPath path: String, chunkSize: Int = 0, progress: WriteProgressHandler) async {
+        return await withCheckedContinuation { continuation in
+            write(stream: stream, toPath: path, chunkSize: chunkSize, progress: progress) { result in
+                continuation.resume()
+            }
+        }
+    }
+    
+    /**
      Uploads local file contents to a new location. With reporting progress on about every 1MiB.
      
      - Note: given url must be local file url otherwise it will throw error.
@@ -440,6 +753,26 @@ public class NFSClient: NSObject {
             }
             
             try self.write(context: context, from: stream, toPath: toPath, progress: progress)
+        }
+    }
+    
+    /**
+     Uploads local file contents to a new location. With reporting progress on about every 1MiB.
+     
+     - Note: given url must be local file url otherwise it will throw error.
+     
+     - Parameters:
+       - at: url of a local file to be uploaded from.
+       - toPath: path of new file to be uploaded to.
+       - progress: reports progress of written bytes count so far.
+           User must return `true` if they want to continuing or `false` to abort copying.
+     */
+    @available(macOS 10.15, iOS 13, *)
+    open func uploadItem(at url: URL, toPath: String, progress: WriteProgressHandler) async {
+        return await withCheckedContinuation { continuation in
+            uploadItem(at: url, toPath: toPath, progress: progress) { result in
+                continuation.resume()
+            }
         }
     }
     
@@ -473,6 +806,28 @@ public class NFSClient: NSObject {
      
      - Note: given url must be local file url otherwise it will throw error.
      
+     - Parameters:
+       - atPath: path of file to be downloaded from.
+       - at: url of a local file to be written to.
+       - progress: reports progress of written bytes count so farand expected length of contents.
+           User must return `true` if they want to continuing or `false` to abort copying.
+     */
+    @available(macOS 10.15, iOS 13, *)
+    open func downloadItem(atPath path: String, to url: URL, progress: ReadProgressHandler) async {
+        return await withCheckedContinuation { continuation in
+            downloadItem(atPath: path, to: url, progress: progress) { result in
+                continuation.resume()
+            }
+        }
+    }
+    
+    /**
+     Downloads file contents to a local url. With reporting progress on about every 1MiB.
+     
+     - Note: if a file already exists on given url, This function will overwrite to that url.
+     
+     - Note: given url must be local file url otherwise it will throw error.
+     
      - Important: Stream will be closed eventually if is not alrady opened.
      
      - Parameters:
@@ -486,6 +841,30 @@ public class NFSClient: NSObject {
                            completionHandler: CompletionHandler) {
         with(completionHandler: completionHandler) { context in
             try self.read(context: context, path: path, to: stream, progress: progress)
+        }
+    }
+    
+    /**
+     Downloads file contents to a local url. With reporting progress on about every 1MiB.
+     
+     - Note: if a file already exists on given url, This function will overwrite to that url.
+     
+     - Note: given url must be local file url otherwise it will throw error.
+     
+     - Important: Stream will be closed eventually if is not alrady opened.
+     
+     - Parameters:
+       - atPath: path of file to be downloaded from.
+       - at: url of a local file to be written to.
+       - progress: reports progress of written bytes count so farand expected length of contents.
+         User must return `true` if they want to continuing or `false` to abort copying.
+     */
+    @available(macOS 10.15, iOS 13, *)
+    open func downloadItem(atPath path: String, to stream: OutputStream, progress: ReadProgressHandler) async {
+        return await withCheckedContinuation { continuation in
+            downloadItem(atPath: path, to: stream, progress: progress) { result in
+                continuation.resume()
+            }
         }
     }
 }
