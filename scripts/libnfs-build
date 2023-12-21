@@ -1,0 +1,10 @@
+#!/bin/sh -xe
+
+cmake -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_PREFIX_PATH=$SCRATCH/$ARCH \
+            -DCMAKE_INSTALL_PREFIX=$SCRATCH/$ARCH \
+            -DBUILD_SHARED_LIBS=false \
+            -DCMAKE_OSX_SYSROOT=$SDKPATH \
+            $SRC/$1
+make -j5 -s
+make -j5 install -s
